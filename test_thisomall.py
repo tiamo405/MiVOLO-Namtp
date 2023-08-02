@@ -30,7 +30,8 @@ def get_parser():
 
     parser.add_argument("--draw", action="store_true", default=False, help="If set, resulted images will be drawn")
     parser.add_argument("--device", default="cuda", type=str, help="Device (accelerator) to use.")
-    parser.add_argument('--dir_path', type= str, default='./')
+    parser.add_argument('--dir_json', type= str, default='./')
+    parser.add_argument('--dir_image', type= str, default= './')
     return parser
 
 
@@ -46,7 +47,7 @@ def main():
 
     predictor = Predictor(args, verbose=True)
     image_files = list(glob.glob(f"{args.dir_path}/*"))
-
+    
     for img_p in image_files:
 
         img = cv2.imread(img_p)

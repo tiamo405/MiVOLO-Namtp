@@ -16,17 +16,24 @@
 #     --checkpoint models/model_utk_age_gender_4.23_97.69.pth.tar \
 #     --device "cpu"
 
-python onnx_export.py \
-    --output "output_onnx" \
-    --with-persons \
-    --checkpoint models/model_imdb_cross_person_4.22_99.46.pth.tar \
-    --device "cpu"
+# python onnx_export.py \
+#     --output "output_onnx" \
+#     --with-persons \
+#     --checkpoint models/model_imdb_cross_person_4.22_99.46.pth.tar \
+#     --device "cpu"
 
 # python onnx_export.py \
 #     --output "output_onnx" \
 #     --with-persons \
 #     --checkpoint models/model_imdb_cross_person_4.24_99.46.pth.tar \
 #     --device "cpu"
+
+
+python torchscript_export.py \
+    --output "output_torchscript" \
+    --with-persons \
+    --checkpoint models/model_imdb_cross_person_4.24_99.46.pth.tar \
+    --device "cpu"
 
 # python test_thisomall.py \
 #     --with-persons \
