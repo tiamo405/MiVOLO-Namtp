@@ -156,8 +156,9 @@ class MiVOLO:
         output = self.inference(model_input)
 
         # write gender and age results into detected_bboxes
-        self.fill_in_results(output, detected_bboxes, faces_inds, bodies_inds)
-
+        ages, genders = self.fill_in_results(output, detected_bboxes, faces_inds, bodies_inds)
+        return ages, genders
+        
     def fill_in_results(self, output, detected_bboxes, faces_inds, bodies_inds):
         if self.meta.only_age:
             age_output = output
@@ -168,7 +169,8 @@ class MiVOLO:
             gender_probs, gender_indx = gender_output.topk(1)
 
         assert output.shape[0] == len(faces_inds) == len(bodies_inds)
-
+        ages = []
+        genders = []
         # per face
         for index in range(output.shape[0]):
             face_ind = faces_inds[index]
@@ -183,6 +185,7 @@ class MiVOLO:
             detected_bboxes.set_age(body_ind, age)
 
             _logger.info(f"\tage: {age}")
+            ages.append(age)
 
             if gender_probs is not None:
                 gender = "male" if gender_indx[index].item() == 0 else "female"
@@ -192,7 +195,8 @@ class MiVOLO:
 
                 detected_bboxes.set_gender(face_ind, gender, gender_score)
                 detected_bboxes.set_gender(body_ind, gender, gender_score)
-
+                genders.append(gender)
+        return ages, genders
     def prepare_crops(self, image: np.ndarray, detected_bboxes: PersonAndFaceResult):
 
         if self.meta.use_person_crops and self.meta.use_face_crops:
