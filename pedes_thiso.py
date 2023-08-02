@@ -2,6 +2,7 @@ import glob
 import os
 import pickle
 import json 
+import cv2
 
 import numpy as np
 import torch.utils.data as data
@@ -107,11 +108,11 @@ class PedesAttr(data.Dataset):
 
         imgpath = os.path.join(self.root_path, imgname)
         
-        img = Image.open(imgpath)
+        img = cv2.imread(imgpath)
 
         gt_label = gt_label.astype(np.float32)
 
-        return img, gt_label, imgname,  # noisy_weight
+        return imgpath, gt_label  # noisy_weight
 
     def __len__(self):
         return len(self.img_id)
@@ -119,9 +120,10 @@ class PedesAttr(data.Dataset):
 def getitem(data_thiso, index) :
     attr_id = ['male', 'female', '1-13', '13-25', '25-39', '40-60', '60+']
     array = data_thiso.__getitem__(index)[1]
+    imgpath = data_thiso.__getitem__(index)[0]
     selected_attributes = [attr for attr, value in zip(attr_id, array) if value == 1]
-    gender ,  age = selected_attributes[0], selected_attributes[1]
-    return gender, age
+    gender, age = selected_attributes[0], selected_attributes[1]
+    return imgpath, gender, age
 if __name__ == "__main__" :
     dir_json = '/mnt/nvme0n1/locpv/cxview-person-attributes/data/THISOMALL/train_thiso/annotations/default.json'
     dir_image = '/mnt/nvme0n1/locpv/cxview-person-attributes/data/THISOMALL/train_thiso/images/default/'

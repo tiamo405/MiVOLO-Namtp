@@ -4,7 +4,7 @@ import os
 
 import cv2
 import torch
-import yt_dlp
+from pedes_thiso import PedesAttr, getitem
 from mivolo.data.data_reader import InputType, get_all_files, get_input_type
 from mivolo.predictor import Predictor
 from timm.utils import setup_default_logging
@@ -47,18 +47,23 @@ def main():
 
     predictor = Predictor(args, verbose=True)
     image_files = list(glob.glob(f"{args.dir_path}/*"))
-    
-    for img_p in image_files:
+    data_thiso = PedesAttr(cfg= None, split= "train", dir_json= args.dir_json, dir_image= args.dir_image)
+    num_item = data_thiso.__len__()
+    count = 0
 
-        img = cv2.imread(img_p)
+    for index in range(num_item):
+        imgpath, gender_tt, age_tt = getitem(data_thiso, index)
+        img =cv2.imread(imgpath)
         detected_objects, out_im, ages, genders = predictor.recognize(img)
+        age, gender = ages[0], genders[0]
+        if gender == gender_tt : count += 1
 
         if args.draw:
-            bname = os.path.splitext(os.path.basename(img_p))[0]
+            bname = os.path.splitext(os.path.basename(imgpath))[0]
             filename = os.path.join(args.output, f"out_{bname}.jpg")
             cv2.imwrite(filename, out_im)
             _logger.info(f"Saved result to {filename}")
-        print(ages[0], genders[0])
-
+        
+    print('{} : du doan dung tren {}'.format(count, num_item))
 if __name__ == "__main__":
     main()
