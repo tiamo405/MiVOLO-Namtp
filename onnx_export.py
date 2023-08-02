@@ -6,7 +6,7 @@ from mivolo.model.create_timm_model import create_model
 
 import argparse
 import torch
-import onnx
+# import onnx
 import logging
 import io
 import os
@@ -176,13 +176,13 @@ if __name__ == '__main__':
         model = model.half()
     model.eval()
     print(model)
-    inputs = cv2.imread("test/jennifer_lawrence.jpg")
+    inputs = cv2.imread("test/000002.jpg")
     inputs = transform(inputs)
 
     # Chuyển đổi tensor về kích thước phù hợp với mô hình (nếu cần) 
     # inputs = torch.stack([inputs]*6, dim= 1)
-    inputs = inputs.unsqueeze(0) 
-    # inputs = inputs.repeat(1,2,1,1)
+    # inputs = inputs.unsqueeze(0) 
+    inputs = inputs.repeat(1,2,1,1)
     print(inputs.shape)
     
     # inputs = torch.randn(args.batch_size, 6, 224, 224).to(args.device)

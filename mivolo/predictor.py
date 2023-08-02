@@ -31,7 +31,7 @@ class Predictor:
             # plot results on image
             out_im = detected_objects.plot()
         print(ages, genders)
-        return detected_objects, out_im
+        return detected_objects, out_im, ages, genders
 
     def recognize_video(self, source: str) -> Generator:
         video_capture = cv2.VideoCapture(source)
