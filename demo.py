@@ -8,6 +8,7 @@ import yt_dlp
 from mivolo.data.data_reader import InputType, get_all_files, get_input_type
 from mivolo.predictor import Predictor
 from timm.utils import setup_default_logging
+import time
 
 _logger = logging.getLogger("inference")
 
@@ -103,7 +104,12 @@ def main():
         for img_p in image_files:
 
             img = cv2.imread(img_p)
+            start_time = time.time()
             detected_objects, out_im, ages, genders = predictor.recognize(img)
+            end_time = time.time()
+            prediction_time = (end_time - start_time)*1000
+            print(f"Thời gian dự đoán: {prediction_time} ms")
+            # detected_objects, out_im, ages, genders = predictor.recognize(img)
 
             if args.draw:
                 bname = os.path.splitext(os.path.basename(img_p))[0]
