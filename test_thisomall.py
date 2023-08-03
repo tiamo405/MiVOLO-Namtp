@@ -16,7 +16,6 @@ _logger = logging.getLogger("inference")
 
 def get_parser():
     parser = argparse.ArgumentParser(description="PyTorch MiVOLO Inference")
-    parser.add_argument("--input", type=str, default=None, required=True, help="image file or folder with images")
     parser.add_argument("--output", type=str, default=None, required=True, help="folder for output results")
     parser.add_argument("--detector-weights", type=str, default=None, required=True, help="Detector weights (YOLOv8).")
     parser.add_argument("--checkpoint", default="", type=str, required=True, help="path to mivolo checkpoint")
@@ -32,6 +31,8 @@ def get_parser():
     parser.add_argument("--device", default="cuda", type=str, help="Device (accelerator) to use.")
     parser.add_argument('--dir_json', type= str, default='./')
     parser.add_argument('--dir_image', type= str, default= './')
+    parser.add_argument('--ckpt_torchscript', type= str, default='models/traced_model.pt')
+    parser.add_argument('--use_torchscript', action="store_true", default= False)
     return parser
 
 
@@ -51,7 +52,8 @@ def main():
     num_item = data_thiso.__len__()
     count_pre = 0
     num_img = 0
-
+    img_fail = []
+    img_error = []
     for index in range(num_item):
         imgpath, gender_tt, age_tt = getitem(data_thiso, index)
         img =cv2.imread(imgpath)
@@ -61,7 +63,8 @@ def main():
             num_img += 1
             age, gender = ages[0], genders[0]
             if gender == gender_tt : count_pre += 1
-
+            else : 
+                img_fail.append(imgpath)
             if args.draw:
                 bname = os.path.splitext(os.path.basename(imgpath))[0]
                 filename = os.path.join(args.output, f"out_{bname}.jpg")
@@ -69,6 +72,7 @@ def main():
                 _logger.info(f"Saved result to {filename}")
             
         except :
+            img_error.append(imgpath)
             continue
         print('{} : du doan dung tren {}'.format(count_pre, num_img))
 if __name__ == "__main__":

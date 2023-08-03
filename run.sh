@@ -40,3 +40,5 @@ python torchscript_export.py \
 #     --checkpoint "models/model_utk_age_gender_4.23_97.69.pth.tar" \
 #     --detector-weights "models/yolov8x_person_face.pt " \
 #     --device "cpu" \
+#     --use_torchscript \
+#     --ckpt_torchscript models/traced_model.pt

@@ -19,6 +19,8 @@ class Predictor:
             use_persons=config.with_persons,
             disable_faces=config.disable_faces,
             verbose=verbose,
+            use_torchscript= config.use_torchscript,
+            ckpt_torchscript= config.ckpt_torchscript
         )
         self.draw = config.draw
 

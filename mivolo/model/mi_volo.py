@@ -79,6 +79,8 @@ class MiVOLO:
         use_persons: bool = True,
         verbose: bool = False,
         torchcompile: Optional[str] = None,
+        use_torchscript: bool = True,
+        ckpt_torchscript: str = "mode.pt"
     ):
         self.verbose = verbose
         self.device = torch.device(device)
@@ -89,14 +91,15 @@ class MiVOLO:
             _logger.info(f"Model meta:\n{str(self.meta)}")
 
         model_name = "mivolo_d1_224"
-        self.model = create_model(
-            model_name=model_name,
-            num_classes=self.meta.num_classes,
-            in_chans=self.meta.in_chans,
-            pretrained=False,
-            checkpoint_path=ckpt_path,
-            filter_keys=["fds."],
-        )
+        # self.model = create_model(
+        #     model_name=model_name,
+        #     num_classes=self.meta.num_classes,
+        #     in_chans=self.meta.in_chans,
+        #     pretrained=False,
+        #     checkpoint_path=ckpt_path,
+        #     filter_keys=["fds."],
+        # )
+        self.model = torch.jit.load("/content/drive/MyDrive/weight/mivolo/traced_model.pt")
         self.param_count = sum([m.numel() for m in self.model.parameters()])
         _logger.info(f"Model {model_name} created, param count: {self.param_count}")
 
@@ -149,18 +152,22 @@ class MiVOLO:
 
         faces_input, person_input, faces_inds, bodies_inds = self.prepare_crops(image, detected_bboxes)
         
-        person_input = prepare_classification_images([image], self.input_size, self.data_config["mean"], self.data_config["std"], device=self.device
+        person_input_test = prepare_classification_images([image], self.input_size, self.data_config["mean"], self.data_config["std"], device=self.device
                                                      )
-        faces_input, person_input, faces_inds, bodies_inds = [faces_input[0]], [person_input[0]], [faces_inds[0]], [bodies_inds[0]]
+        faces_input_test, faces_inds_test, bodies_inds_test = faces_input[0].unsqueeze(0), [faces_inds[0]], [bodies_inds[0]]
+        # print(faces_input.shape, person_input.shape, person_input_test.shape)
+        # print(faces_input_test.shape)
+        # print(faces_inds, bodies_inds, faces_inds_test, bodies_inds_test)
 
         if self.meta.with_persons_model:
-            model_input = torch.cat((faces_input, person_input), dim=1)
+            model_input = torch.cat((faces_input_test, person_input_test), dim=1)
         else:
-            model_input = faces_input
+            model_input = faces_input_test
         output = self.inference(model_input)
-
+        # print(person_input)
+        # print(person_input_test)
         # write gender and age results into detected_bboxes
-        ages, genders = self.fill_in_results(output, detected_bboxes, faces_inds, bodies_inds)
+        ages, genders = self.fill_in_results(output, detected_bboxes, faces_inds_test, bodies_inds_test)
         return ages, genders
         
     def fill_in_results(self, output, detected_bboxes, faces_inds, bodies_inds):
@@ -188,14 +195,14 @@ class MiVOLO:
             detected_bboxes.set_age(face_ind, age)
             detected_bboxes.set_age(body_ind, age)
 
-            _logger.info(f"\tage: {age}")
+            # _logger.info(f"\tage: {age}")
             ages.append(age)
 
             if gender_probs is not None:
                 gender = "male" if gender_indx[index].item() == 0 else "female"
                 gender_score = gender_probs[index].item()
 
-                _logger.info(f"\tgender: {gender} [{int(gender_score * 100)}%]")
+                # _logger.info(f"\tgender: {gender} [{int(gender_score * 100)}%]")
 
                 detected_bboxes.set_gender(face_ind, gender, gender_score)
                 detected_bboxes.set_gender(body_ind, gender, gender_score)
