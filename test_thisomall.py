@@ -70,13 +70,13 @@ def main():
                 bname = os.path.splitext(os.path.basename(imgpath))[0]
                 filename = os.path.join(args.output, f"out_{bname}.jpg")
                 cv2.imwrite(filename, out_im)
-                _logger.info(f"Saved result to {filename}")
+                # _logger.info(f"Saved result to {filename}")
             
         except :
             img_error.append(imgpath)
             continue
         print('{} : du doan dung tren {}'.format(count_pre, num_img))
-        print('img_error: ',img_error)
-        print('img fail: ', img_fail)
+    print('img_error: ',img_error)
+    print('img fail: ', img_fail)
 if __name__ == "__main__":
     main()

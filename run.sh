@@ -35,11 +35,13 @@ python torchscript_export.py \
     --checkpoint models/model_imdb_cross_person_4.24_99.46.pth.tar \
     --device "cpu"
 
-python test_thisomall.py \
-    --with-persons \
-    --checkpoint "models/model_utk_age_gender_4.23_97.69.pth.tar" \
-    --detector-weights "models/yolov8x_person_face.pt " \
-    --device "cpu" \
-    --use_torchscript \
-    --ckpt_torchscript models/traced_model.pt \
-    --input 'input_custom'
+# python test_thisomall.py \
+#     --with-persons \
+#     --checkpoint "models/model_utk_age_gender_4.23_97.69.pth.tar" \
+#     --detector-weights "models/yolov8x_person_face.pt " \
+#     --device "cpu" \
+#     --dir_json "/content/drive/MyDrive/weight/mivolo/default.json" \
+#     --dir_image "/content/train" \
+#     --use_torchscript \
+#     --ckpt_torchscript models/traced_model.pt \
+#     --input 'input_custom'
