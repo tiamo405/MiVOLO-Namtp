@@ -7,6 +7,7 @@ from mivolo.data.misc import prepare_classification_images
 from mivolo.model.create_timm_model import create_model
 from mivolo.structures import PersonAndFaceCrops, PersonAndFaceResult
 from timm.data import resolve_data_config
+import time
 
 _logger = logging.getLogger("MiVOLO")
 has_compile = hasattr(torch, "compile")
@@ -163,24 +164,30 @@ class MiVOLO:
         # print(faces_input.shape, person_input.shape, person_input_custom.shape)
         # print(faces_input_custom.shape)
         # print(faces_inds, bodies_inds, faces_inds_custom, bodies_inds_custom)
+        
         if self.input_model == 'input_default' :
             if self.meta.with_persons_model:
                 model_input = torch.cat((faces_input, person_input), dim=1)
             else:
                 model_input = faces_input
+            start_time = time.time()
             output = self.inference(model_input)
+            end_time = time.time()
+            prediction_time = (end_time - start_time)*1000
+
             # write gender and age results into detected_bboxes
             ages, genders = self.fill_in_results(output, detected_bboxes, faces_inds, bodies_inds)
-            return ages, genders
+            return ages, genders, prediction_time
         else :
             if self.meta.with_persons_model:
                 model_input = torch.cat((faces_input_custom, person_input_custom), dim=1)
             else:
                 model_input = faces_input_custom
             output = self.inference(model_input)
+
             # write gender and age results into detected_bboxes
             ages, genders = self.fill_in_results(output, detected_bboxes, faces_inds_custom, bodies_inds_custom)
-
+            return ages, genders, prediction_time
         
         
         

@@ -56,18 +56,17 @@ def main():
     num_img = 0
     img_fail = []
     img_error = []
+    pre_time = 0
     for index in range(num_item):
         imgpath, gender_tt, age_tt = getitem(data_thiso, index)
         img =cv2.imread(imgpath)
         print(imgpath)
         try:
-            start_time = time.time()
-            detected_objects, out_im, ages, genders = predictor.recognize(img)
-            end_time = time.time()
-            prediction_time = (end_time - start_time)*1000
-            print(f"Thời gian dự đoán: {prediction_time} ms")
+            detected_objects, out_im, ages, genders, prediction_time = predictor.recognize(img)
             num_img += 1
             age, gender = ages[0], genders[0]
+            pre_time += prediction_time
+            print(f"Thời gian dự đoán trung binh: {pre_time/num_img} ms")
             if gender == gender_tt : count_pre += 1
             else : 
                 img_fail.append(imgpath)
