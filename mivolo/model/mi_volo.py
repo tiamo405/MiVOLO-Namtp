@@ -148,6 +148,10 @@ class MiVOLO:
             return
 
         faces_input, person_input, faces_inds, bodies_inds = self.prepare_crops(image, detected_bboxes)
+        
+        person_input = prepare_classification_images([image], self.input_size, self.data_config["mean"], self.data_config["std"], device=self.device
+                                                     )
+        faces_input, person_input, faces_inds, bodies_inds = [faces_input[0]], [person_input[0]], [faces_inds[0]], [bodies_inds[0]]
 
         if self.meta.with_persons_model:
             model_input = torch.cat((faces_input, person_input), dim=1)
@@ -221,10 +225,10 @@ class MiVOLO:
             bodies_crops, self.input_size, self.data_config["mean"], self.data_config["std"], device=self.device
         )
 
-        _logger.info(
-            f"faces_input: {faces_input.shape if faces_input is not None else None}, "
-            f"person_input: {person_input.shape if person_input is not None else None}"
-        )
+        # _logger.info(
+        #     f"faces_input: {faces_input.shape if faces_input is not None else None}, "
+        #     f"person_input: {person_input.shape if person_input is not None else None}"
+        # )
 
         return faces_input, person_input, faces_inds, bodies_inds
 
