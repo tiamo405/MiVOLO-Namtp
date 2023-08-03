@@ -33,6 +33,7 @@ def get_parser():
     parser.add_argument('--dir_image', type= str, default= './')
     parser.add_argument('--ckpt_torchscript', type= str, default='models/traced_model.pt')
     parser.add_argument('--use_torchscript', action="store_true", default= False)
+    parser.add_argument('--input', type= str, default='input_custom', choices=['input_default', 'input_custom'])
     return parser
 
 
@@ -75,5 +76,7 @@ def main():
             img_error.append(imgpath)
             continue
         print('{} : du doan dung tren {}'.format(count_pre, num_img))
+        print('img_error: ',img_error)
+        print('img fail: ', img_fail)
 if __name__ == "__main__":
     main()

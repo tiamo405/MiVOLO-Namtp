@@ -80,8 +80,10 @@ class MiVOLO:
         verbose: bool = False,
         torchcompile: Optional[str] = None,
         use_torchscript: bool = True,
-        ckpt_torchscript: str = "mode.pt"
+        ckpt_torchscript: str = "mode.pt",
+        input_model: str = 'input_default'
     ):
+        self.input_model = input_model
         self.verbose = verbose
         self.device = torch.device(device)
         self.half = half and self.device.type != "cpu"
@@ -155,23 +157,32 @@ class MiVOLO:
 
         faces_input, person_input, faces_inds, bodies_inds = self.prepare_crops(image, detected_bboxes)
         
-        person_input_test = prepare_classification_images([image], self.input_size, self.data_config["mean"], self.data_config["std"], device=self.device
+        person_input_custom = prepare_classification_images([image], self.input_size, self.data_config["mean"], self.data_config["std"], device=self.device
                                                      )
-        faces_input_test, faces_inds_test, bodies_inds_test = faces_input[0].unsqueeze(0), [faces_inds[0]], [bodies_inds[0]]
-        # print(faces_input.shape, person_input.shape, person_input_test.shape)
-        # print(faces_input_test.shape)
-        # print(faces_inds, bodies_inds, faces_inds_test, bodies_inds_test)
+        faces_input_custom, faces_inds_custom, bodies_inds_custom = faces_input[0].unsqueeze(0), [faces_inds[0]], [bodies_inds[0]]
+        # print(faces_input.shape, person_input.shape, person_input_custom.shape)
+        # print(faces_input_custom.shape)
+        # print(faces_inds, bodies_inds, faces_inds_custom, bodies_inds_custom)
+        if self.input_model == 'input_default' :
+            if self.meta.with_persons_model:
+                model_input = torch.cat((faces_input, person_input), dim=1)
+            else:
+                model_input = faces_input
+            output = self.inference(model_input)
+            # write gender and age results into detected_bboxes
+            ages, genders = self.fill_in_results(output, detected_bboxes, faces_inds, bodies_inds)
+            return ages, genders
+        else :
+            if self.meta.with_persons_model:
+                model_input = torch.cat((faces_input_custom, person_input_custom), dim=1)
+            else:
+                model_input = faces_input_custom
+            output = self.inference(model_input)
+            # write gender and age results into detected_bboxes
+            ages, genders = self.fill_in_results(output, detected_bboxes, faces_inds_custom, bodies_inds_custom)
 
-        if self.meta.with_persons_model:
-            model_input = torch.cat((faces_input_test, person_input_test), dim=1)
-        else:
-            model_input = faces_input_test
-        output = self.inference(model_input)
-        # print(person_input)
-        # print(person_input_test)
-        # write gender and age results into detected_bboxes
-        ages, genders = self.fill_in_results(output, detected_bboxes, faces_inds_test, bodies_inds_test)
-        return ages, genders
+        
+        
         
     def fill_in_results(self, output, detected_bboxes, faces_inds, bodies_inds):
         if self.meta.only_age:
