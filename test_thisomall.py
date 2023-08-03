@@ -9,6 +9,7 @@ from mivolo.data.data_reader import InputType, get_all_files, get_input_type
 from mivolo.predictor import Predictor
 from timm.utils import setup_default_logging
 import glob
+import time
 
 _logger = logging.getLogger("inference")
 
@@ -60,7 +61,11 @@ def main():
         img =cv2.imread(imgpath)
         print(imgpath)
         try:
+            start_time = time.time()
             detected_objects, out_im, ages, genders = predictor.recognize(img)
+            end_time = time.time()
+            prediction_time = (end_time - start_time)*1000
+            print(f"Thời gian dự đoán: {prediction_time} ms")
             num_img += 1
             age, gender = ages[0], genders[0]
             if gender == gender_tt : count_pre += 1
