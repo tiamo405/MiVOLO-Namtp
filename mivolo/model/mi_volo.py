@@ -91,15 +91,18 @@ class MiVOLO:
             _logger.info(f"Model meta:\n{str(self.meta)}")
 
         model_name = "mivolo_d1_224"
-        # self.model = create_model(
-        #     model_name=model_name,
-        #     num_classes=self.meta.num_classes,
-        #     in_chans=self.meta.in_chans,
-        #     pretrained=False,
-        #     checkpoint_path=ckpt_path,
-        #     filter_keys=["fds."],
-        # )
-        self.model = torch.jit.load("/content/drive/MyDrive/weight/mivolo/traced_model.pt")
+        if use_torchscript :
+            self.model = torch.jit.load(ckpt_torchscript)
+        else :
+            self.model = create_model(
+                model_name=model_name,
+                num_classes=self.meta.num_classes,
+                in_chans=self.meta.in_chans,
+                pretrained=False,
+                checkpoint_path=ckpt_path,
+                filter_keys=["fds."],
+            )
+        
         self.param_count = sum([m.numel() for m in self.model.parameters()])
         _logger.info(f"Model {model_name} created, param count: {self.param_count}")
 
